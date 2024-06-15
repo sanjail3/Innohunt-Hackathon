@@ -15,11 +15,10 @@ contract CreateToken is ERC20 {
 contract InnoHunt {
     address private owner;
     uint public totalProjects;
-    uint256 public constant PRICE_CHANGE_THRESHOLD = 1000; 
 
     struct Project {
         address owner;
-        string name;
+        uint256 totalRaised;
         uint256 totalShares;
         uint256 remainingShares;
         uint256 shareprice;
@@ -32,9 +31,12 @@ contract InnoHunt {
     }
 
     struct Proposal {
-        string description;
         uint256 upvoteCount;
         uint256 downvoteCount;
+        uint256 startTime;
+        uint256 duration;
+        uint256 endTime;
+        uint256 threshold;
         mapping(address => Vote) votes;
     }
 
@@ -52,13 +54,13 @@ contract InnoHunt {
     }
 
     function createProject(string memory name,string memory symbol, uint _minProposalThreshold, uint _minVoteThreshold, uint _shareprice, uint _totalshares) external {
-        projects[totalProjects].owner = msg.sender;
-        projects[totalProjects].name = name;
-        projects[totalProjects].minProposalThreshold = _minProposalThreshold;
-        projects[totalProjects].minVoteThreshold = _minVoteThreshold;
-        projects[totalProjects].totalShares = _totalshares;
-        projects[totalProjects].remainingShares = _totalshares;
-        projects[totalProjects].shareprice = _shareprice;
+        Project storage project = projects[totalProjects];
+        project.owner = msg.sender;
+        project.minProposalThreshold = _minProposalThreshold;
+        project.minVoteThreshold = _minVoteThreshold;
+        project.totalShares = _totalshares;
+        project.remainingShares = _totalshares;
+        project.shareprice = _shareprice;
         totalProjects++;
 
         address newToken = address(new CreateToken(name, symbol, _totalshares, address(this)));
@@ -68,11 +70,13 @@ contract InnoHunt {
 
     function buyShares(uint256 projectId, uint256 _amount) external payable {
         require(_amount > 0, "Invalid amount");
-        uint256 cost = _amount * projects[projectId].shareprice;
+        Project storage project = projects[projectId];
+        uint256 cost = _amount * project.shareprice;
         require(msg.value >= cost, "Insufficient funds");
+        project.totalRaised += cost;
         IERC20(projectTokens[projectId]).transfer(msg.sender, _amount);
-        projects[projectId].remainingShares -= _amount;
-        projects[projectId].shareprice = ((projects[projectId].totalShares) + (projects[projectId].totalShares*15)/100) / IERC20(projectTokens[projectId]).balanceOf(address(this));
+        project.remainingShares -= _amount;
+        project.shareprice = ((project.totalShares) + (project.totalShares*15)/100) / IERC20(projectTokens[projectId]).balanceOf(address(this));
     }
 
     function sellShares(uint256 projectId, uint256 _amount) external payable {
@@ -83,5 +87,37 @@ contract InnoHunt {
         (bool s,) = msg.sender.call{value: revenue*1e18}("");
         require(s);
         projects[projectId].shareprice = ((projects[projectId].totalShares) - (projects[projectId].totalShares*15)/100) / IERC20(projectTokens[projectId]).balanceOf(address(this));
+    }
+
+
+    function createProposal(uint projectId, uint duration,uint _threshold) external {
+        Project storage project = projects[projectId];
+        project.proposalCount++;
+        Proposal storage newProposal = project.proposals[project.proposalCount];
+        newProposal.threshold = _threshold;
+        newProposal.startTime = block.timestamp; 
+        newProposal.duration = duration * 1 days; 
+        newProposal.endTime = newProposal.startTime + newProposal.duration;
+    }
+
+    function vote(uint projectId, uint256 proposalId, bool isUpvote, uint _amount) external {
+        Project storage project = projects[projectId];
+        Proposal storage proposal = project.proposals[proposalId];
+        require(proposal.endTime > block.timestamp);
+        require(_amount > 0  && _amount <=  project.shares[msg.sender]);
+        require(!proposal.votes[msg.sender].hasVoted, "Already voted");
+
+        if (isUpvote) {
+            proposal.upvoteCount += _amount;
+        } else {
+            proposal.downvoteCount += _amount;
+        }
+        proposal.votes[msg.sender] = Vote(true, isUpvote, _amount);
+    }
+
+    function getProposalVotes(uint projectId, uint256 proposalId) external view returns (uint256 upvotes, uint256 downvotes) {
+        Project storage project = projects[projectId];
+        Proposal storage proposal = project.proposals[proposalId];
+        return (proposal.upvoteCount, proposal.downvoteCount);
     }
 }
