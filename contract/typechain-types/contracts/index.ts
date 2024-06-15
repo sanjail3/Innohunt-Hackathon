@@ -3,4 +3,3 @@
 /* eslint-disable */
 import type * as innoHuntSol from "./InnoHunt.sol";
 export type { innoHuntSol };
-export type { InnoHuntToken } from "./InnoHuntToken";

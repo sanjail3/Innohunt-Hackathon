@@ -2,4 +2,3 @@
 /* tslint:disable */
 /* eslint-disable */
 export * as innoHuntSol from "./InnoHunt.sol";
-export { InnoHuntToken__factory } from "./InnoHuntToken__factory";
