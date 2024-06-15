@@ -3,6 +3,7 @@ pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "hardhat/console.sol";
 
 
 contract CreateToken is ERC20 {
@@ -61,6 +62,7 @@ contract InnoHunt {
         totalProjects++;
 
         address newToken = address(new CreateToken(name, symbol, _totalshares, address(this)));
+        IERC20(newToken).approve(address(this), _totalshares);
         projectTokens[totalProjects-1] = newToken;
     }
 
@@ -68,20 +70,18 @@ contract InnoHunt {
         require(_amount > 0, "Invalid amount");
         uint256 cost = _amount * projects[projectId].shareprice;
         require(msg.value >= cost, "Insufficient funds");
-        IERC20(projectTokens[projectId]).transferFrom(address(this), msg.sender, _amount);
+        IERC20(projectTokens[projectId]).transfer(msg.sender, _amount);
+        projects[projectId].remainingShares -= _amount;
         projects[projectId].shareprice = ((projects[projectId].totalShares) + (projects[projectId].totalShares*15)/100) / IERC20(projectTokens[projectId]).balanceOf(address(this));
     }
 
-    function sellShares(uint256 projectId, uint256 _amount) external {
+    function sellShares(uint256 projectId, uint256 _amount) external payable {
         require(_amount > 0 && IERC20(projectTokens[projectId]).balanceOf(msg.sender) >= _amount, "Invalid amount");
         uint256 revenue = _amount * projects[projectId].shareprice;
         IERC20(projectTokens[projectId]).transferFrom(msg.sender,address(this), _amount);
-        payable(msg.sender).transfer(revenue);
+        projects[projectId].remainingShares += _amount;
+        (bool s,) = msg.sender.call{value: revenue*1e18}("");
+        require(s);
         projects[projectId].shareprice = ((projects[projectId].totalShares) - (projects[projectId].totalShares*15)/100) / IERC20(projectTokens[projectId]).balanceOf(address(this));
     }
-
-    
-
-
-
 }

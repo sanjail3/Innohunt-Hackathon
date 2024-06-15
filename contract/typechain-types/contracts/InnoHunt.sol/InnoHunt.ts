@@ -175,7 +175,7 @@ export interface InnoHunt extends BaseContract {
   sellShares: TypedContractMethod<
     [projectId: BigNumberish, _amount: BigNumberish],
     [void],
-    "nonpayable"
+    "payable"
   >;
 
   totalProjects: TypedContractMethod<[], [bigint], "view">;
@@ -234,7 +234,7 @@ export interface InnoHunt extends BaseContract {
   ): TypedContractMethod<
     [projectId: BigNumberish, _amount: BigNumberish],
     [void],
-    "nonpayable"
+    "payable"
   >;
   getFunction(
     nameOrSignature: "totalProjects"
