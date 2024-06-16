@@ -171,16 +171,7 @@ export default () => {
           <div className={`flex-1 lg:static  ${isActive ? 'w-full fixed top-20 inset-x-0 px-4 lg:px-0' : 'hidden lg:block'}`}>
             <div className="p-4 px-4 mt-8 text-sm bg-slate-900 rounded-lg lg:block lg:mt-0 lg:p-0 lg:bg-transparent">
               <ul className="justify-end items-center space-y-6 text-slate-400 lg:flex lg:space-x-6 lg:space-y-0">
-                {!isLoggedin ? (
-                  <li>
-                    <button onClick={() => setNewsletterModalActive(true)} className="flex items-center gap-x-2 hover:text-slate-200">
-                      <BellIcon className="w-5 h-5" />
-                      Subscribe
-                    </button>
-                  </li>
-                ) : (
-                  ''
-                )}
+                
                 <li className="hidden lg:block mt-1">
                   <button aria-label="Search button" onClick={() => setCommandActive(true)} className="hover:text-slate-200">
                     <IconSearch />
@@ -241,7 +232,7 @@ export default () => {
                 <div className='custom-container'>
                 <p>{loggedUser.substring(0, 16) + '....'}</p>
             </div>: 
-              <button className='custom-button' onClick={handleConnectWallet}>Connect Wallet</button>
+              <button className='bg-orange-500 hover:bg-orange-600 text-white text-center rounded-lg px-3 p-2 duration-150 btnshake' onClick={handleConnectWallet}>Connect Wallet</button>
             }
 
 
@@ -253,35 +244,7 @@ export default () => {
           </div>
         </div>
       </nav>
-      {isBannerActive && !isLoggedin ? (
-        <div className="animate-bottom-bannner fixed bottom-10 inset-x-0 z-30 max-w-xl mx-auto px-4">
-          <div className=" flex items-center gap-x-3 bg-slate-800 p-3 rounded-lg">
-            <div className="flex items-center justify-center rounded-full w-12 h-12 border-slate-700 bg-slate-900/70 text-slate-300">
-              <BellAlertIcon className="w-6 h-6" />
-            </div>
-            <p className="flex-1 text-sm text-slate-300">
-              <button
-                onClick={() => setNewsletterModalActive(true)}
-                className="text-slate-100 hover:text-orange-500 duration-150 underline"
-              >
-                Subscribe
-              </button>{' '}
-              to get weekly email with best new dev tools.
-            </p>
-            <button
-              onClick={() => {
-                setBannerActive(false);
-                localStorage.setItem('isNewsletterActive', 'true');
-              }}
-              className="p-1 rounded-md text-slate-400 hover:bg-slate-700 duration-150"
-            >
-              <XMarkIcon className="w-5 h-5" />
-            </button>
-          </div>
-        </div>
-      ) : (
-        ''
-      )}
+      
       <NewsletterModal isActive={isNewsletterModalActive} closeModal={setNewsletterModalActive} />
       <CommandPalette
         isCommandActive={isCommandActive}

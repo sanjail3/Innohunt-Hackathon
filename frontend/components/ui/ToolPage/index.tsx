@@ -116,9 +116,9 @@ export default async function ToolPage({ slug }: { slug: string }): Promise<JSX.
             launchEnd={product.launch_end as string}
           />
           <Gauge width={100} height={100} value={70} startAngle={-90} endAngle={90} />
+
         </div>
       </div>
-
       <Tabs ulClassName="container-custom-screen" className="mt-20 sticky pt-2 top-[3.75rem] z-10 bg-slate-900">
         {tabs.map((item, idx) => (
           <TabLink hash={item.hash} key={idx}>
@@ -163,8 +163,9 @@ export default async function ToolPage({ slug }: { slug: string }): Promise<JSX.
             )}
           </div>
         </div>
-
-
+        <div>
+          Heloo 
+        </div>
         <CommentSection productId={product.owner_id as string} comments={comments as any} slug={slug} />
         {/* Keep doing based on Product interface */}
         <div className="container-custom-screen" id="details">
