@@ -1,13 +1,11 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import ProductsService from '@/utils/supabase/services/products';
 import ToolCardEffect from '@/components/ui/ToolCardEffect/ToolCardEffect';
 import { ProductType } from '@/type';
-// import { shuffleToolsBasedOnDate } from '@/utils/helpers';
 import { createBrowserClient } from '@/utils/supabase/browser';
 import CountdownPanel from '@/components/ui/CountDownPanel';
-
-import { useEffect, useState } from 'react';
 import SkeletonToolCard from '@/components/ui/Skeletons/SkeletonToolCard';
 
 export default function Home() {
@@ -30,6 +28,25 @@ export default function Home() {
       console.log(launchWeeks);
     };
     fetchData();
+  }, []);
+
+  useEffect(() => {
+    // Load the Voiceflow chatbot script
+    const script = document.createElement('script');
+    script.type = 'text/javascript';
+    script.onload = function() {
+      window.voiceflow.chat.load({
+        verify: { projectID: '666957700d2fa08301471ad1' },
+        url: 'https://general-runtime.voiceflow.com',
+        versionID: 'production'
+      });
+    };
+    script.src = "https://cdn.voiceflow.com/widget/bundle.mjs";
+    document.head.appendChild(script);
+
+    return () => {
+      document.head.removeChild(script);
+    };
   }, []);
 
   function weekTools(group) {
