@@ -130,7 +130,7 @@ Investors encounter several significant challenges when looking to invest in sta
 - **Decentralization**: Reduce reliance on intermediaries, lowering costs and increasing access for global participants.
 
 ## Output
-![First](out_assets\1.jpg)
+![First](out_assets/1.jpg)
 ![First](out_assets\2.jpg)
 ![First](out_assets\3.jpg)
 ![First](out_assets\4.jpg)
