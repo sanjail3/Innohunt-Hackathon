@@ -7,8 +7,6 @@ https://github.com/sanjail3/Innohunt-Hackathon/assets/131733014/cfa6c444-13be-45
 1. [Problem Statement](#1-problem-statement)
    - [For Founders](#for-founders)
    - [For Investors](#for-investors)
-   - [Flow Chart]
-   ![Flow Chart](innohunt.png)
 2. [Platform Onboarding](#2-platform-onboarding)
    - [For Founders](#for-founders-1)
    - [For Investors](#for-investors)
@@ -61,6 +59,9 @@ Investors encounter several significant challenges when looking to invest in sta
 
 **6. Visibility and Liquidity**
 - Limited visibility into the ongoing performance and progress of startups.
+
+## Flow Chart
+![Flow Chart](innohunt.png)
 
 ## 2. Platform Onboarding
 
