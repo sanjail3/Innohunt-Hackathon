@@ -30,6 +30,10 @@ import TrendingToolsList from './TrendingToolsList';
 import WinnerBadge from '../WinnerBadge';
 import handleURLQuery from '@/utils/handleURLQuery';
 import VoterAvatarsList from '../VoterAvatarsList';
+import UpVoteButton from '../UpVoteButton/UpVoteButton';
+import SellButton from '../SellButton';
+import BuyButton from '../BuyButton';
+import {Button} from '../Button';
 
 export default ({ href, tool, close }: { href: string; tool: ProductType; close: () => void }) => {
   // const window = new JSDOM('').window;
@@ -190,6 +194,38 @@ export default ({ href, tool, close }: { href: string; tool: ProductType; close:
                 </div>
               )}
             </div>
+          </div>
+
+          <div className="container-custom-screen" id="launches">
+            <h1 className="text-slate-50 font-medium text-center text-[20px]">Shares</h1> 
+            <div className='flex justify-center mt-6'>
+
+            <Button size="sm" variant="premium" className="bg-orange-500 rounded ml-10">
+                Buy Shares
+            </Button> 
+ 
+            <Button size="sm" variant="premium" className="bg-orange-500 rounded ml-10">
+                Sell Shares
+            </Button> 
+
+            <Button size="sm" variant="premium" className="bg-green-500 rounded ml-10">
+                Withdraw
+            </Button> 
+            </div>        
+          </div>
+
+          <div className="container-custom-screen" id="launches">
+            <h1 className="text-slate-50 font-medium">Proposal</h1>
+            <p className="text-slate-300 mt-6">Proposal to integrate new APIs into the InnoHunt platform. These APIs will enhance user experience by providing real-time project updates, seamless share transactions, and comprehensive proposal tracking. The integration aims to improve platform efficiency and user engagement.</p>
+            <div className = "mt-6">
+            <UpVoteButton
+            productId={tool?.id}
+            count={tool?.votes_count}
+            launchDate={tool?.launch_date}
+            launchEnd={tool.launch_end as string}
+            />
+            </div>
+            
           </div>
           
           

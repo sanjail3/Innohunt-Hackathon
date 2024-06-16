@@ -11,6 +11,7 @@ import ProfileService from '@/utils/supabase/services/profile';
 import Web3Context from '@/contexts/ContractContext';
 import { Button } from '@/components/ui/Button';
 import { IconVote, IconDownVote } from '@/components/Icons';
+import BuyModal from '../BuyModal';
 
 interface Props extends React.HTMLAttributes<HTMLButtonElement> {
   count: number;
@@ -51,9 +52,6 @@ export default ({ count, productId, className = '', launchDate = '', launchEnd =
     setdownVoteCount(parseInt(tx[1]));
   }
 
-  useEffect(()=>{
-   getVote();
-  })
 
   useEffect(() => {
     session && session.user
@@ -99,14 +97,7 @@ export default ({ count, productId, className = '', launchDate = '', launchEnd =
             : 'bg-orange-500 hover:bg-orange-600 active:bg-orange-600'
         } ${className}`}
       >
-        <div className="flex items-center gap-x-2">
-          <IconVote className="w-4 h-4" />
-          <span ref={voteCountRef} className="duration-150">
-            {upVoteCount}
-          </span>
-        </div>
-        <span className={`w-px h-4 ${isUpvoted ? 'bg-orange-500' : 'bg-orange-300'}`}></span>
-        {isUpvoted ? 'Upvoted' : 'Upvote'}
+        {isUpvoted ? 'Upvoted' : 'Buy Shares'}
         <div
           ref={shadowElRef}
           className={`absolute top-0 left-0 w-9 h-9 bg-gradient-to-tr blur-[20px] opacity-0 group-hover:opacity-100 duration-150 ${
@@ -114,36 +105,9 @@ export default ({ count, productId, className = '', launchDate = '', launchEnd =
           }`}
         ></div>
       </Button>
-
-      <Button
-        onClick={toggleVote}
-        {...props}
-        onMouseMove={handleHoverEffect}
-        className={`flex items-center gap-x-3 hover:scale-[1.02] active:scale-100 ring-offset-1 ring-red-500 focus:ring-2 bg-transparent overflow-hidden relative duration-200 group ${
-          isUpvoted
-            ? 'focus:ring-offset-0 focus:ring-0 border border-orange-500 text-orange-500'
-            : 'bg-orange-500 hover:bg-orange-600 active:bg-orange-600'
-        } ${className}`}
-      >
-        <div className="flex items-center gap-x-2">
-          <IconDownVote className="w-4 h-4" />
-          <span ref={voteCountRef} className="duration-150">
-            {downVoteCount}
-          </span>
-        </div>
-        <span className={`w-px h-4 ${isUpvoted ? 'bg-orange-500' : 'bg-orange-300'}`}></span>
-        {isUpvoted ? 'Downvoted' : 'Downvote'}
-        <div
-          ref={shadowElRef}
-          className={`absolute top-0 left-0 w-9 h-9 bg-gradient-to-tr blur-[20px] opacity-0 group-hover:opacity-100 duration-150 ${
-            isUpvoted ? 'from-slate-300 to-slate-500' : 'from-slate-50 to-slate-100'
-          }`}
-        ></div>
-      </Button>
-
       </div>
 
-      <VotingModal
+      <BuyModal
         isActive={isModalActive}
         onClose={() => setModalActive(false)}  // Pass setModalActive to close the modal
         icon={<IconInformationCircle className="text-blue-500 w-6 h-6" />}
@@ -151,7 +115,7 @@ export default ({ count, productId, className = '', launchDate = '', launchEnd =
         description={"Enter the amount of Vote(i.e No.of ERC20)"}
       >
         {/* Modal Content */}
-      </VotingModal>
+      </BuyModal>
     </>
   );
 };
