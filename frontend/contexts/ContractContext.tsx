@@ -10,7 +10,7 @@ export const Web3Provider = ({ children }) => {
     const [loggedUser, setLoggedUser] = useState('');
     const [contractInstance, setContractInstance] = useState(null);
 
-    const contractAddress = '0x588D133e934095582Ad3847F375b346875a3F830'; 
+    const contractAddress = '0x0dE9EB5Ca6F5880843B0e3884B6FD7646A05006d'; 
 
     const initWeb3 = async () => {
         if (window.ethereum && walletConnected) {
