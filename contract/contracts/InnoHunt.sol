@@ -5,7 +5,6 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "hardhat/console.sol";
 
-
 contract CreateToken is ERC20 {
     constructor(string memory name, string memory symbol, uint256 initialSupply, address to) ERC20(name, symbol) {
         _mint(to, initialSupply);
@@ -23,20 +22,18 @@ contract InnoHunt {
         uint256 remainingShares;
         uint256 shareprice;
         mapping(address => uint256) shares;
-        address[] investors;
-        uint256 minProposalThreshold;
-        uint256 minVoteThreshold;
         uint256 proposalCount;
         mapping(uint256 => Proposal) proposals;
+        address tokenAddress;
+        bool isWithdrawed;
     }
 
     struct Proposal {
         uint256 upvoteCount;
         uint256 downvoteCount;
-        uint256 startTime;
-        uint256 duration;
-        uint256 endTime;
         uint256 threshold;
+        uint256 currThreshold;
+        uint256 requiredFund;
         mapping(address => Vote) votes;
     }
 
@@ -47,68 +44,99 @@ contract InnoHunt {
     }
 
     mapping(uint256 => Project) public projects;
-    mapping(uint256 => address) public projectTokens;
 
     constructor() {
         owner = msg.sender;
     }
 
-    function createProject(string memory name,string memory symbol, uint _minProposalThreshold, uint _minVoteThreshold, uint _shareprice, uint _totalshares) external {
-        Project storage project = projects[totalProjects];
+    function createProject(
+        string memory name,
+        string memory symbol,
+        uint _shareprice,
+        uint _totalshares
+    ) external {
+        uint projectId = totalProjects; 
+        Project storage project = projects[projectId];
         project.owner = msg.sender;
-        project.minProposalThreshold = _minProposalThreshold;
-        project.minVoteThreshold = _minVoteThreshold;
         project.totalShares = _totalshares;
         project.remainingShares = _totalshares;
         project.shareprice = _shareprice;
-        totalProjects++;
-
+        totalProjects = projectId + 1;
         address newToken = address(new CreateToken(name, symbol, _totalshares, address(this)));
-        IERC20(newToken).approve(address(this), _totalshares);
-        projectTokens[totalProjects-1] = newToken;
+        project.tokenAddress = newToken;
     }
 
+
     function buyShares(uint256 projectId, uint256 _amount) external payable {
-        require(_amount > 0, "Invalid amount");
+        assert(_amount > 0);
         Project storage project = projects[projectId];
         uint256 cost = _amount * project.shareprice;
         require(msg.value >= cost, "Insufficient funds");
+
         project.totalRaised += cost;
-        IERC20(projectTokens[projectId]).transfer(msg.sender, _amount);
+
+        IERC20(project.tokenAddress).transfer(msg.sender, _amount);
+        project.shares[msg.sender] += _amount;
         project.remainingShares -= _amount;
-        project.shareprice = ((project.totalShares) + (project.totalShares*15)/100) / IERC20(projectTokens[projectId]).balanceOf(address(this));
+        project.shareprice = ((project.totalShares) + (project.totalShares*7)/100) / IERC20(project.tokenAddress).balanceOf(address(this));
     }
 
     function sellShares(uint256 projectId, uint256 _amount) external payable {
-        require(_amount > 0 && IERC20(projectTokens[projectId]).balanceOf(msg.sender) >= _amount, "Invalid amount");
-        uint256 revenue = _amount * projects[projectId].shareprice;
-        IERC20(projectTokens[projectId]).transferFrom(msg.sender,address(this), _amount);
-        projects[projectId].remainingShares += _amount;
+        Project storage project = projects[projectId];
+        require(_amount > 0 && IERC20(project.tokenAddress).balanceOf(msg.sender) >= _amount, "Invalid amount");
+        uint256 revenue = _amount * project.shareprice;
+        IERC20(project.tokenAddress).transferFrom(msg.sender,address(this), _amount);
+        project.shares[msg.sender] -= _amount;
+        project.remainingShares += _amount;
+        project.totalRaised -= revenue;
         (bool s,) = msg.sender.call{value: revenue*1e18}("");
         require(s);
-        projects[projectId].shareprice = ((projects[projectId].totalShares) - (projects[projectId].totalShares*15)/100) / IERC20(projectTokens[projectId]).balanceOf(address(this));
+        project.shareprice = ((project.totalShares) - (project.totalShares*15)/100) / IERC20(project.tokenAddress).balanceOf(address(this));
     }
 
-
-    function createProposal(uint projectId, uint duration,uint _threshold) external {
+    function withdraw(uint projectId) external {
         Project storage project = projects[projectId];
-        project.proposalCount++;
+        require(project.owner == msg.sender, "Only owner can withdraw!");
+        require(!project.isWithdrawed, "Owner can withdraw only one time");
+        require(project.totalRaised > 0, "Not enough Funds to withdraw!");
+        require(address(this).balance > project.totalRaised);
+        (bool s,) = msg.sender.call{value: (project.totalRaised/2)*1e18}("");
+        require(s);
+        project.totalRaised = project.totalRaised/2;
+        project.isWithdrawed = true;
+    }
+
+    function createProposal(uint projectId,uint _threshold,uint _requiredFund) external {
+        Project storage project = projects[projectId];
+        require(msg.sender == project.owner, "Only owner is Allowed");
+
         Proposal storage newProposal = project.proposals[project.proposalCount];
         newProposal.threshold = _threshold;
-        newProposal.startTime = block.timestamp; 
-        newProposal.duration = duration * 1 days; 
-        newProposal.endTime = newProposal.startTime + newProposal.duration;
+        
+        require(_requiredFund <= project.totalRaised, "Fund not enough");
+        newProposal.requiredFund = _requiredFund;
+        project.proposalCount += 1;
     }
 
-    function vote(uint projectId, uint256 proposalId, bool isUpvote, uint _amount) external {
+    function vote(uint projectId, uint256 proposalId, bool isUpvote, uint _amount) external payable {
         Project storage project = projects[projectId];
+        require(_amount > 0  && _amount <=  project.shares[msg.sender], "Not enough shares");
         Proposal storage proposal = project.proposals[proposalId];
-        require(proposal.endTime > block.timestamp);
-        require(_amount > 0  && _amount <=  project.shares[msg.sender]);
-        require(!proposal.votes[msg.sender].hasVoted, "Already voted");
 
+        require(!(proposal.votes[msg.sender].hasVoted), "Already voted");
+    
         if (isUpvote) {
             proposal.upvoteCount += _amount;
+            proposal.currThreshold += 1;
+
+            if(proposal.upvoteCount >= (project.totalShares*75)/100){
+                 if(proposal.currThreshold >= proposal.threshold){
+                    require(address(this).balance > proposal.requiredFund, "Not enough funds");
+                    (bool s,) = projects[projectId].owner.call{value: proposal.requiredFund * 1e18}("");
+                    require(s);
+                    projects[projectId].totalRaised -= proposal.requiredFund;
+                 }
+            }
         } else {
             proposal.downvoteCount += _amount;
         }
@@ -120,4 +148,11 @@ contract InnoHunt {
         Proposal storage proposal = project.proposals[proposalId];
         return (proposal.upvoteCount, proposal.downvoteCount);
     }
+
+    function getProposal(uint projectId, uint256 proposalId) external view returns (uint,uint,uint,uint,uint) {
+        Project storage project = projects[projectId];
+        Proposal storage proposal = project.proposals[proposalId];
+        return (proposal.upvoteCount, proposal.downvoteCount,proposal.threshold,proposal.currThreshold,proposal.requiredFund);
+    }
+    
 }
