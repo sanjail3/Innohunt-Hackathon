@@ -16,6 +16,7 @@ import ModalBannerCodeClient from '@/components/ui/ModalBannerCode/ModalBannerCo
 import HomeSection from '@/components/ui/Home';
 import dynamic from 'next/dynamic';
 import ProfileFormModal from '@/components/ui/ProfileFormModal';
+import { Web3Provider } from '@/contexts/ContractContext';
 
 import Ask from '@/components/Ask/Ask';
 const ChatWindow = dynamic(() => import('@/components/ui/ChatWindow'), { ssr: false });
@@ -118,6 +119,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body className={inter.className} id="root" style={{ background: 'linear-gradient(to left, #f4f6fd,#f4f6fd)' }}>
         <main>
           <ChatWindow />
+          <Web3Provider>
           <SupabaseProvider user={profile as Profile} session={session}>
             <SupabaseListener serverAccessToken={session?.access_token} />
             {/* <ProfileFormModal isModalOpen={user ? (profileNoCache?.social_url == null ? true : false) : false} /> */}
@@ -129,6 +131,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             {children}
             <Footer />
           </SupabaseProvider>
+          </Web3Provider>
         </main>
       </body>
     </html>

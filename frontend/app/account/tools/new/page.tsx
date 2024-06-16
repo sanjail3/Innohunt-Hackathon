@@ -19,6 +19,7 @@ import ProductsService from '@/utils/supabase/services/products';
 import { Profile, type ProductCategory, type ProductPricingType } from '@/utils/supabase/types';
 import { type File } from 'buffer';
 import { type ChangeEvent, useEffect, useState } from 'react';
+import { useContext } from 'react';
 import { useForm, type SubmitHandler, Controller } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
 import SelectLaunchDate from '@/components/ui/SelectLaunchDate';
@@ -26,6 +27,7 @@ import axios from 'axios';
 import ProfileService from '@/utils/supabase/services/profile';
 import { usermaven } from '@/utils/usermaven';
 import Alert from '@/components/ui/Alert';
+import Web3Context from '@/contexts/ContractContext';
 
 interface Inputs {
   tool_name: string;
@@ -39,6 +41,10 @@ interface Inputs {
   launch_date: Date;
   launch_start: Date;
   launch_end: Date;
+  share_name: string;
+  share_price: string;
+  total_shares: string;
+  share_symbol: string;
 }
 
 export default () => {
@@ -80,6 +86,7 @@ export default () => {
   const [isLaunching, setLaunching] = useState<boolean>(false);
 
   const [allWeeks, setAllWeeks] = useState<{ week: number; startDate: Date; endDate: Date; count: number }[]>([]);
+  const { contractInstance } = useContext(Web3Context);
 
   useEffect(() => {
     pricingTypesList.then(types => {
@@ -161,9 +168,19 @@ export default () => {
     } else return true;
   };
 
+  const createProject = async (name : string,symbol:string,_shareprice:string,_totalshares:string) => {
+    let tx = await contractInstance.createProject(name, symbol,_shareprice,_totalshares);
+    console.log(tx);
+  }
+
   const onSubmit: SubmitHandler<Inputs> = async data => {
     if (validateImages() && (await validateToolName())) {
-      const { tool_name, tool_website, tool_description, slogan, pricing_type, github_repo, demo_video, week } = data;
+      const { tool_name, tool_website, tool_description, slogan, pricing_type, github_repo, demo_video, week, 
+        share_name, share_symbol, share_price, total_shares
+      } = data;
+      console.log(share_name, total_shares, share_symbol, share_price);
+      createProject(share_name, share_symbol,share_price, total_shares);
+
       const categoryIds = categories.map(item => item.id);
 
       const launchWeek = typeof week === 'string' ? parseInt(week) : week;
@@ -423,9 +440,45 @@ export default () => {
               <LabelError className="mt-2">{imagesError}</LabelError>
             </div>
           </FormLaunchSection>
+          
+          <FormLaunchSection number={4} title="Shares" description="Unlock Share Potential: Gather Vital Investment Insights.">
+          <div>
+              <Label>Share Name</Label>
+              <Input
+                placeholder="Adani Enterprises"
+                className="w-full mt-2"
+                validate={{ ...register('share_name', { required: true, minLength: 3 }) }}
+              />
+          </div>
+          <div>
+              <Label>Share Symbol</Label>
+              <Input
+                placeholder="ADEL"
+                className="w-full mt-2"
+                validate={{ ...register('share_symbol', { required: true, maxLength: 6 }) }}
+              />
+          </div>
+          <div>
+            <Label>Share Price</Label>
+              <Input
+                placeholder="Eg. 5"
+                className="w-full mt-2"
+                validate={{ ...register('share_price', { required: true}) }}
+              />
+          </div>
+          <div>
+              <Label>Total Shares</Label>
+              <Input
+                placeholder="Eg. 100"
+                className="w-full mt-2"
+                validate={{ ...register('total_shares', { required: true }) }}
+              />
+          </div>
+          </FormLaunchSection>
+
 
           <FormLaunchSection
-            number={4}
+            number={5}
             title="Launch Week for Your Dev Tool"
             description="Setting the perfect launch week is essential to make a splash in the dev world."
           >

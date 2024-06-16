@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import Brand from '../Brand';
 import Link from 'next/link';
 import ButtonMenu from './ButtonMenu';
@@ -19,6 +19,8 @@ import { ChevronDownIcon, XMarkIcon } from '@heroicons/react/24/solid';
 import NewsletterModal from '../NewsletterModal';
 import { BellAlertIcon, BellIcon } from '@heroicons/react/24/outline';
 import useOnclickOutside from 'react-cool-onclickoutside';
+import Web3Context from '../../../contexts/ContractContext';
+import { Web3 } from 'web3';
 
 export default () => {
   const [isActive, setActive] = useState(false);
@@ -28,6 +30,74 @@ export default () => {
   const [isCommandActive, setCommandActive] = useState(false);
   const [searchValue, setSearchValue] = useState('');
   const [searchResult, setSearchResult] = useState<Product[]>([]);
+  const { loggedUser, setLoggedUser, walletConnected, setWalletConnected } = useContext(Web3Context);
+
+
+  useEffect(() => {
+    if (window.ethereum) {
+      window.ethereum.on('accountsChanged', async () => {
+        await window.ethereum.request({ method: 'eth_requestAccounts' });
+        const web3Instance = new Web3(window.ethereum);
+        await web3Instance.eth.getAccounts().then((accounts) => {
+          setWalletConnected(false);
+          setLoggedUser(accounts[0]);
+        })
+        localStorage.clear();
+        window.location.reload();
+      })
+    }
+  });
+
+  useEffect(() => {
+    if (localStorage.getItem('loggedUser') !== null) {
+      setLoggedUser(localStorage.getItem('loggedUser'));
+      setWalletConnected(true);
+    }
+    else {
+      console.log("Not Logged in!!");
+    }
+  }, []);
+
+  const handleConnectWallet = async () => {
+
+    if (window.ethereum !== undefined) {
+      let user;
+      await window.ethereum.request({ method: 'eth_requestAccounts' });
+      const web3Instance = new Web3(window.ethereum);
+      await web3Instance.eth.getAccounts().then((accounts) => {
+        user = accounts[0];
+        setLoggedUser(accounts[0]);
+        localStorage.setItem("loggedUser", `${accounts[0]}`);
+      })
+
+      if (user) {
+        const d = new Date();
+        let hours = d.getHours();
+        const minutes = d.getMinutes().toString().padStart(2, '0');
+        const seconds = d.getSeconds().toString().padStart(2, '0');
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12 || 12;
+        const currentTime = `${hours}:${minutes}:${seconds} ${ampm}`;
+        const date = `${d.getUTCDate()}/${d.getUTCMonth() + 1}/${d.getUTCFullYear()}`;
+        const message = `Sign the message:\n\nThis is only for account verification: \n\nDATE:  ${date} \nTIME:  ${currentTime}`;
+
+        try {
+          await web3Instance.eth.personal.sign(message, user, '').then((e) => {
+            if (e) {
+              localStorage.setItem("message", `${e}`);
+              setWalletConnected(true);
+            }
+          });
+        }
+        catch (err) {
+          window.alert("Sign the Message to Continue.")
+        }
+      }
+    }
+    else {
+      window.alert("Install Metamask to continue!!!")
+    }
+  };
 
   const browserService = createBrowserClient();
   const toolsService = new ProductsService(browserService);
@@ -52,8 +122,8 @@ export default () => {
   };
 
   const navigation = [
-    { title: 'Explore', path: '/the-story#ads', className:'text-orange-500' },
-    { title: 'Ask', path: '/Ask', className:'text-orange-500' },
+    { title: 'Explore', path: '/the-story#ads', className: 'text-orange-500' },
+    { title: 'Ask', path: '/Ask', className: 'text-orange-500' },
     {
       title: 'Create new product ',
       path: isLoggedin ? '/account/tools' : '/login',
@@ -111,7 +181,7 @@ export default () => {
                 ) : (
                   ''
                 )}
-                 <li className="hidden lg:block mt-1">
+                <li className="hidden lg:block mt-1">
                   <button aria-label="Search button" onClick={() => setCommandActive(true)} className="hover:text-slate-200">
                     <IconSearch />
                   </button>
@@ -126,9 +196,8 @@ export default () => {
                       <ChevronDownIcon className="w-4 h-4 transition-transform duration-[250] ease-in group-data-[state=open]:-rotate-180" />
                     </button>
                     <div
-                      className={`top-8 left-0 text-sm py-4 rounded-lg w-80 lg:px-4 lg:bg-slate-800 lg:absolute ${
-                        isNavMenuActive ? '' : 'hidden'
-                      }`}
+                      className={`top-8 left-0 text-sm py-4 rounded-lg w-80 lg:px-4 lg:bg-slate-800 lg:absolute ${isNavMenuActive ? '' : 'hidden'
+                        }`}
                     >
                       <div className="space-y-4">
                         <ul className="mt-2 space-y-3">
@@ -167,8 +236,15 @@ export default () => {
                     </li>
                   );
                 })}
-               
-  
+
+                {(walletConnected == true) ? 
+                <div className='custom-container'>
+                <p>{loggedUser.substring(0, 16) + '....'}</p>
+            </div>: 
+              <button className='custom-button' onClick={handleConnectWallet}>Connect Wallet</button>
+            }
+
+
                 <li className={`space-y-3 items-center gap-x-6 lg:flex lg:space-y-0 ${isLoggedin ? 'hidden lg:flex' : ''}`}>
                   <Auth onLogout={handleLogout} />
                 </li>
