@@ -9,6 +9,11 @@ The InnoHunt contract is a decentralized project funding and voting platform whe
 - CreateToken: An ERC20 token contract used for project shares.
 - InnoHunt: The main contract managing projects, shares, proposals, and voting.
 
+# Language, Tools
+ - Blockchain: Camp Network
+ - Smartcontract: Solidity
+ - Testing: Hardhat
+
 # Structs
 - Project: Represents a project with details such as owner, total raised funds, total shares, remaining shares, share price, token address, and proposals.
 
