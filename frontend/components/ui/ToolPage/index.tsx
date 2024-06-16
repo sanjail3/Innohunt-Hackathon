@@ -163,6 +163,9 @@ export default async function ToolPage({ slug }: { slug: string }): Promise<JSX.
             )}
           </div>
         </div>
+        <div>
+          Heloo 
+        </div>
         <CommentSection productId={product.owner_id as string} comments={comments as any} slug={slug} />
         {/* Keep doing based on Product interface */}
         <div className="container-custom-screen" id="details">
