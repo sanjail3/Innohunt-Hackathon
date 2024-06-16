@@ -1,4 +1,7 @@
-# Funding and Investing Process
+# INNOVHUNT ⛏️
+
+## Output
+https://github.com/sanjail3/Innohunt-Hackathon/assets/131733014/cfa6c444-13be-451f-a112-b30ac2a73df2
 
 ## Table of Contents
 1. [Problem Statement](#1-problem-statement)
