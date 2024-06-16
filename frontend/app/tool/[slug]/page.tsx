@@ -205,6 +205,7 @@ export default async function Page({ params: { slug } }: { params: { slug: strin
             )}
           </div>
         </div>
+
         <CommentSection productId={product.owner_id as string} comments={comments as any} slug={slug} />
         {/* Keep doing based on Product interface */}
         <div className="container-custom-screen" id="details">
@@ -233,6 +234,7 @@ export default async function Page({ params: { slug } }: { params: { slug: strin
             </div>
           ) : null}
         </div>
+
         <div className="container-custom-screen" id="launches">
           <h3 className="text-slate-50 font-medium">Trending launches</h3>
           <TrendingToolsList />
