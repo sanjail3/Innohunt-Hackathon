@@ -3,16 +3,19 @@
 # Overview
 The InnoHunt contract is a decentralized project funding and voting platform where users can create projects, buy and sell shares, create proposals for project funding, and vote on these proposals. Each project has an associated ERC20 token representing its shares.
 
+# Language, Tools
+ - Blockchain: Camp Network
+ - Smartcontract: Solidity
+ - Testing: Hardhat
+
+# PROOF OF DEPLOYMENT
+ Deplyment Link:- [Deployment link](https://explorerl2new-camp-network-4xje7wy105.t.conduit.xyz/address/0x0dE9EB5Ca6F5880843B0e3884B6FD7646A05006d?tab=txs)
+ 
 # Key Components
 
 # Contracts
 - CreateToken: An ERC20 token contract used for project shares.
 - InnoHunt: The main contract managing projects, shares, proposals, and voting.
-
-# Language, Tools
- - Blockchain: Camp Network
- - Smartcontract: Solidity
- - Testing: Hardhat
 
 # Structs
 - Project: Represents a project with details such as owner, total raised funds, total shares, remaining shares, share price, token address, and proposals.
@@ -34,8 +37,6 @@ The InnoHunt contract is a decentralized project funding and voting platform whe
 
 - Vote on Proposal: Allows users to vote on proposals with their shares.
 
-# PROOF OF DEPLOYMENT
- Deplyment Link:- [Deployment link](https://explorerl2new-camp-network-4xje7wy105.t.conduit.xyz/address/0x0dE9EB5Ca6F5880843B0e3884B6FD7646A05006d?tab=txs)
 # Test Preview
 ![image](https://github.com/sanjail3/Innohunt-Hackathon/assets/121343334/9b3ca8ab-4991-40f8-af3d-baf1a3a34d76)
 
